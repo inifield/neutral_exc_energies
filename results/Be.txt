@@ -37,3 +37,59 @@ GW-BSE Excitation Predictions
 
     GW-BSE Excitation energies: [2.252689 2.253016 2.253019 2.253648 2.255625]
 
+***************************************************************
+CC-BSE Consistency between Spin-Free and Spin Basis for Be (eV)
+***************************************************************
+Occupied self-energy: 4/4 matched (atol=0.0001, rtol=0.0)
+Virtual self-energy: 1936/1936 matched (atol=0.0001, rtol=0.0)
+Occupied fock matrix: 4/4 matched (atol=0.0001, rtol=0.0)
+Virtual fock Matrix: 1936/1936 matched (atol=0.0001, rtol=0.0)
+Occupied Extended Fock Operator matrix: 2/2 matched (atol=0.0001, rtol=0.0)
+Virtual Extended Fock Operator matrix: 44/44 matched (atol=0.0001, rtol=0.0)
+Singlet excitation energies: 0/88 matched (atol=0.0001, rtol=0.0)
+Triplet excitation energies: 0/88 matched (atol=0.0001, rtol=0.0)
+
+Ionisation Potentials(IP) and Electron Affinities(EA)  
+
+    IP: [-128.49899337   -9.57135116]
+    EA: [0.42596445 0.42596445 0.42596445 0.96531978 1.9330932 ]
+
+Spin Excitation Energy Predictions 
+
+    Singlet excitation energies: [12.28042582 12.28042582 12.28042582 13.66947024 15.77443235]
+    Triplet excitation energies: [-6.04230014e-15 -3.02138624e-15 -1.51133950e-15 -1.51116607e-15
+ -1.51111509e-15]
+
+Spin-Free Excitation Energy Predictions 
+
+    Singlet excitation energies: [6.31342547 6.31342547 6.31342547 7.29779381 7.97093159]
+    Triplet excitation energies: [3.64535028 3.64535028 3.64535028 6.79409282 7.73748282]
+
+***************************************************************
+CC-BSE Consistency between Spin-Free and Spin Basis for Be (eV)
+***************************************************************
+Occupied self-energy: 4/4 matched (atol=0.0001, rtol=0.0)
+Virtual self-energy: 1936/1936 matched (atol=0.0001, rtol=0.0)
+Occupied fock matrix: 4/4 matched (atol=0.0001, rtol=0.0)
+Virtual fock Matrix: 1936/1936 matched (atol=0.0001, rtol=0.0)
+Occupied Extended Fock Operator matrix: 2/2 matched (atol=0.0001, rtol=0.0)
+Virtual Extended Fock Operator matrix: 44/44 matched (atol=0.0001, rtol=0.0)
+Singlet excitation energies: 0/88 matched (atol=0.0001, rtol=0.0)
+Triplet excitation energies: 0/88 matched (atol=0.0001, rtol=0.0)
+
+Ionisation Potentials(IP) and Electron Affinities(EA)  
+
+    IP: [-128.49899337   -9.57135116]
+    EA: [0.42596445 0.42596445 0.42596445 0.96531978 1.9330932 ]
+
+Spin Excitation Energy Predictions 
+
+    Singlet excitation energies: [12.28042582 12.28042582 12.28042582 13.66947024 15.77443235]
+    Triplet excitation energies: [-3.95878426e-15 -3.02205127e-15 -3.02171429e-15 -3.01618965e-15
+ -2.82651293e-15]
+
+Spin-Free Excitation Energy Predictions 
+
+    Singlet excitation energies: [6.31342547 6.31342547 6.31342547 7.29779381 7.97093159]
+    Triplet excitation energies: [3.64535028 3.64535028 3.64535028 6.79409283 7.73748282]
+

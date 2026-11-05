@@ -37,3 +37,59 @@ GW-BSE Excitation Predictions
 
     GW-BSE Excitation energies: [3.409154 3.410973 3.417284 3.420535 4.042262]
 
+***************************************************************
+CC-BSE Consistency between Spin-Free and Spin Basis for H2 (eV)
+***************************************************************
+Occupied self-energy: 1/1 matched (atol=0.0001, rtol=0.0)
+Virtual self-energy: 2025/2025 matched (atol=0.0001, rtol=0.0)
+Occupied fock matrix: 1/1 matched (atol=0.0001, rtol=0.0)
+Virtual fock Matrix: 2025/2025 matched (atol=0.0001, rtol=0.0)
+Occupied Extended Fock Operator matrix: 1/1 matched (atol=0.0001, rtol=0.0)
+Virtual Extended Fock Operator matrix: 45/45 matched (atol=0.0001, rtol=0.0)
+Singlet excitation energies: 0/45 matched (atol=0.0001, rtol=0.0)
+Triplet excitation energies: 0/45 matched (atol=0.0001, rtol=0.0)
+
+Ionisation Potentials(IP) and Electron Affinities(EA)  
+
+    IP: [-15.14077958]
+    EA: [1.31523627 1.55048077 4.38349994 5.5236945  5.5236945 ]
+
+Spin Excitation Energy Predictions 
+
+    Singlet excitation energies: [20.43141656 20.96970269 24.77015298 27.52994521 27.52994521]
+    Triplet excitation energies: [-6.31341064e-16 -2.89974336e-16 -2.89974336e-16 -1.65888613e-16
+ -1.65888613e-16]
+
+Spin-Free Excitation Energy Predictions 
+
+    Singlet excitation energies: [11.51179052 12.26162427 13.67895881 13.67895881 14.35633527]
+    Triplet excitation energies: [ 7.93613352 11.45247061 12.09391877 12.09391877 13.20087915]
+
+***************************************************************
+CC-BSE Consistency between Spin-Free and Spin Basis for H2 (eV)
+***************************************************************
+Occupied self-energy: 1/1 matched (atol=0.0001, rtol=0.0)
+Virtual self-energy: 2025/2025 matched (atol=0.0001, rtol=0.0)
+Occupied fock matrix: 1/1 matched (atol=0.0001, rtol=0.0)
+Virtual fock Matrix: 2025/2025 matched (atol=0.0001, rtol=0.0)
+Occupied Extended Fock Operator matrix: 1/1 matched (atol=0.0001, rtol=0.0)
+Virtual Extended Fock Operator matrix: 45/45 matched (atol=0.0001, rtol=0.0)
+Singlet excitation energies: 0/45 matched (atol=0.0001, rtol=0.0)
+Triplet excitation energies: 0/45 matched (atol=0.0001, rtol=0.0)
+
+Ionisation Potentials(IP) and Electron Affinities(EA)  
+
+    IP: [-15.14077958]
+    EA: [1.31523627 1.55048077 4.38349994 5.5236945  5.5236945 ]
+
+Spin Excitation Energy Predictions 
+
+    Singlet excitation energies: [20.43141656 20.96970269 24.77015298 27.52994521 27.52994521]
+    Triplet excitation energies: [-1.47667152e-15 -5.63620176e-16 -2.43507236e-16 -1.59555059e-16
+ -1.59555059e-16]
+
+Spin-Free Excitation Energy Predictions 
+
+    Singlet excitation energies: [11.51179052 12.26162427 13.67895881 13.67895881 14.35633527]
+    Triplet excitation energies: [ 7.93613352 11.45247061 12.09391877 12.09391877 13.20087915]
+

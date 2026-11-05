@@ -9,8 +9,8 @@ np.set_printoptions(precision=10, suppress=True, linewidth=100000)
 eV2au = 0.0367493
 
 
-label = 'Be'
-mol = gto.M(atom="Be 0.00000000 0.00000000 0.00000000",
+label = 'H2'
+mol = gto.M(atom="H 0.00 0.00 0.00; H 0.00 0.00 2.00",
             basis='aug-cc-pVTZ',
             spin=0,
             symmetry=False,
@@ -40,6 +40,8 @@ selfener_occ_spa, selfener_vir_spa, fock_occ_spa, fock_vir_spa, se_occ_spa, se_v
 print()
 print('CC-BSE in spin-free basis COMPLETED.')
 print()
+print("Singlet energies (eV):", singE_spa / eV2au)
+print("Triplet energies (eV):", tripE_spa / eV2au)
 
 #spin
 hbse_sing, hbse_trip, selfener_occ_spin, selfener_vir_spin, fock_occ_spin, fock_vir_spin, se_occ_spin, se_vir_spin, val, singE_spin, tripE_spin= \
@@ -47,6 +49,8 @@ hbse_sing, hbse_trip, selfener_occ_spin, selfener_vir_spin, fock_occ_spin, fock_
 print()
 print('CC-BSE in spin basis COMPLETED.')
 print()
+print("Singlet energies (eV):", singE_spin / eV2au)
+print("Triplet energies (eV):", tripE_spin / eV2au)
 
 # with open("results.txt", "a", encoding="utf-8") as f:
 #     f.write(f"{label}\n")
