@@ -4,9 +4,6 @@ from pyscf import gto, scf, cc
 import src.BSE_Helper as helper
 from src.cc_BSE_spatialorb import CC_BSE_spinfree
 from src.cc_BSE_spinorb import CC_BSE_spin
-from src.RPA_spatial import RPA_ORCA_all, RPA_spatial66
-from src.RPA import RPA
-from src.GW_BSE import GW_BSE
 
 np.set_printoptions(precision=10, suppress=True, linewidth=100000)
 eV2au = 0.0367493
@@ -50,36 +47,6 @@ hbse_sing, hbse_trip, selfener_occ_spin, selfener_vir_spin, fock_occ_spin, fock_
 print()
 print('CC-BSE in spin basis COMPLETED.')
 print()
-
-#RPA calculations
-print('Standard RPA calculation.')
-singE, tripE, rpa_eig, X_rpa, Y_rpa, A, B = RPA(mol,myhf,n_occ_spatial,n_vir_spatial)
-print()
-print(np.sort(singE)[:5]/eV2au)
-print()
-print('Standard RPA calculation COMPLETED.')
-print()
-
-# GW-BSE calculations from RPA
-print("Starting GW-BSE calculation")
-singEspa = GW_BSE(mol,myhf,X_rpa,Y_rpa,rpa_eig,n_occ_spatial)
-print(np.sort(singEspa)/eV2au)
-print('GW-BSE calculation COMPLETED.')
-print()
-
-print()
-print('Starting Orca RPA calculation; SingEner:')
-singEORCA, horca, A, B, _, _ ,t2_rpa = RPA_ORCA_all(mol,myhf,n_occ_spatial)
-print(singEORCA[:5]/eV2au)
-print()
-
-print()
-print('Starting RPA in Chris paper; SingEner, TripEner:')
-singEPaper, tripEPaper, hrpa66 = RPA_spatial66(mol,myhf,n_occ_spatial,A,B,t2_rpa)
-print(singEPaper[:5]/eV2au)
-print(tripEPaper[:5]/eV2au)
-print()
-
 
 # with open("results.txt", "a", encoding="utf-8") as f:
 #     f.write(f"{label}\n")
