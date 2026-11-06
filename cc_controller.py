@@ -40,8 +40,8 @@ selfener_occ_spa, selfener_vir_spa, fock_occ_spa, fock_vir_spa, se_occ_spa, se_v
 print()
 print('CC-BSE in spin-free basis COMPLETED.')
 print()
-print("Singlet energies (eV):", singE_spa / eV2au)
-print("Triplet energies (eV):", tripE_spa / eV2au)
+print("Singlet energies (eV):", np.sort(singE_spa / eV2au)[:5])
+print("Triplet energies (eV):", np.sort(tripE_spa / eV2au)[:5])
 
 #spin
 hbse_sing, hbse_trip, selfener_occ_spin, selfener_vir_spin, fock_occ_spin, fock_vir_spin, se_occ_spin, se_vir_spin, val, singE_spin, tripE_spin= \
@@ -49,8 +49,8 @@ hbse_sing, hbse_trip, selfener_occ_spin, selfener_vir_spin, fock_occ_spin, fock_
 print()
 print('CC-BSE in spin basis COMPLETED.')
 print()
-print("Singlet energies (eV):", singE_spin / eV2au)
-print("Triplet energies (eV):", tripE_spin / eV2au)
+print("Singlet energies (eV):", np.sort(singE_spin / eV2au)[:5])
+print("Triplet energies (eV):", np.sort(tripE_spin / eV2au)[:5])
 
 # with open("results.txt", "a", encoding="utf-8") as f:
 #     f.write(f"{label}\n")
