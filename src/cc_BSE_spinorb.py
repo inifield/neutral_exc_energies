@@ -20,7 +20,7 @@ def get_self_energy(t2_spin:np.ndarray, oovv:np.ndarray) -> tuple[np.ndarray,np.
     """
 
     occ_selfeng = 0.5 * np.einsum("ikab,jkab -> ij", oovv,t2_spin,optimize="optimal")
-    vir_selfeng = -0.5 * np.einsum("ijac,ijbc -> ba", oovv,t2_spin,optimize="optimal")
+    vir_selfeng = -0.5 * np.einsum("ijbc,ijac -> ab", oovv,t2_spin,optimize="optimal")
 
     return occ_selfeng, vir_selfeng
 
@@ -31,17 +31,17 @@ def build_gfock(mol,myhf,mycc,t2_spin, oovv, n_occ_spatial,n_vir_spatial):
     fock_occ, fock_vir = helper.bccd_fock_mat(mol,myhf,mycc,n_occ_spatial,n_vir_spatial,spin=True) 
 
     F_ij = occ_selfeng + fock_occ    #(n_occ x n_occ)
-    F_ba = vir_selfeng + fock_vir    #(n_vir x n_vir)
+    F_ab = vir_selfeng + fock_vir    #(n_vir x n_vir)
 
     F_ij_v,_,_,_,_ = dgeev(F_ij)
     diagFij = np.sort(F_ij_v)    
-    F_ba_v,_,_,_,_ = dgeev(F_ba)
-    diagFba = np.sort(F_ba_v)
+    F_ab_v,_,_,_,_ = dgeev(F_ab)
+    diagFab = np.sort(F_ab_v)
 
-    return diagFij,diagFba,F_ij,F_ba
+    return diagFij,diagFab,F_ij,F_ab
 
-def build_bse(F_ij:np.ndarray,F_ba:np.ndarray,ovvo,oovv,t2, n_occ, n_vir):
-    F_baij = np.einsum('ba,ij->iajb', F_ba, np.identity(n_occ),optimize='optimal')
+def build_bse(F_ij:np.ndarray,F_ab:np.ndarray,ovvo,oovv,t2, n_occ, n_vir):
+    F_baij = np.einsum('ba,ij->iajb', F_ab, np.identity(n_occ),optimize='optimal')
     F_ijab = np.einsum('ij,ab->iajb', F_ij, np.identity(n_vir),optimize='optimal')
 
     H_bse = np.zeros((n_occ,n_vir,n_occ,n_vir))

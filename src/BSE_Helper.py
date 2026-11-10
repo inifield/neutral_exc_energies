@@ -132,7 +132,7 @@ def get_self_energy(t2:np.ndarray, oovv:np.ndarray) -> tuple[np.ndarray,np.ndarr
     return occ_selfeng, vir_selfeng
 
 def build_fock_matrices(mol,n_occ:int,n_vir:int)-> tuple[np.ndarray,np.ndarray]:
-    """Generates the occupied and virtual fock matricies using PySCF.
+    """Generates the occupied and virtual fock matrices using PySCF.
 
     Parameters
     ----------

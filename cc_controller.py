@@ -1,5 +1,5 @@
 import numpy as np
-from pyscf import gto, scf, cc
+from pyscf import gto, scf, cc, lib
 
 import src.BSE_Helper as helper
 from src.cc_BSE_spatialorb import CC_BSE_spinfree
@@ -14,13 +14,13 @@ mol = gto.M(atom="H 0.00 0.00 0.00; H 0.00 0.00 2.00",
             basis='aug-cc-pVTZ',
             spin=0,
             symmetry=False,
-            unit="Bohr")
+            unit="Bohr",verbose=0)
 
 print()
 print(label)
 print()
 
-myhf = mol.HF.run() 
+myhf = mol.HF().run() 
 mycc = cc.BCCD(myhf,max_cycle = 200, conv_tol_normu=1e-8).run()
 mo = mycc.mo_coeff
 t2 = mycc.t2
@@ -49,6 +49,7 @@ hbse_sing, hbse_trip, selfener_occ_spin, selfener_vir_spin, fock_occ_spin, fock_
 print()
 print('CC-BSE in spin basis COMPLETED.')
 print()
+# print(np.sort(val / eV2au))
 print("Singlet energies (eV):", np.sort(singE_spin / eV2au)[:5])
 print("Triplet energies (eV):", np.sort(tripE_spin / eV2au)[:5])
 
