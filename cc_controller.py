@@ -53,28 +53,6 @@ print()
 print("Singlet energies (eV):", np.sort(singE_spin / eV2au)[:5])
 print("Triplet energies (eV):", np.sort(tripE_spin / eV2au)[:5])
 
-# with open("results.txt", "a", encoding="utf-8") as f:
-#     f.write(f"{label}\n")
-    
-#     f.write('CC-BSE in spin-free basis; SingEner, TripEner:\n')
-    
-#     f.write(f"{singE_spa[:5]/eV2au}\n")
-#     f.write(f"{tripE_spa[:5]/eV2au}\n")
-#     f.write("\n")
-
-#     f.write('Starting Orca RPA calculation; SingEner:\n')
-#     singEORCA, horca, A, B, _, _, t2_rpa = RPA_ORCA_all(mol,myhf,n_occ_spatial)
-#     f.write(f"{singEORCA[:5]/eV2au}\n")
-#     f.write("\n")
-
-#     f.write('Starting RPA in Chris paper; SingEner, TripEner:\n')
-#     singEPaper, tripEPaper, hrpa66 = RPA_spatial66(mol,myhf,n_occ_spatial,A,B,t2_rpa)
-#     f.write(f"{singEPaper[:5]/eV2au}\n")
-#     f.write(f"{tripEPaper[:5]/eV2au}\n")
-
-#     diff = RPAselfConsisCheck(horca, hrpa66)
-#     f.write(f"RPA Self-Consistency Check: {diff}")
-#     f.write("\n\n")
 
 
 

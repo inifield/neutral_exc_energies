@@ -1,6 +1,6 @@
 import numpy as np
 import src.BSE_Helper as helper
-from scipy.linalg.lapack import dgeev 
+from scipy.linalg.lapack import dgeev
 
 
 def get_selfenergy_spatial(t2,oovv, goovv):
