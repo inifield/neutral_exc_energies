@@ -230,15 +230,15 @@ def bccd_t2_amps(mycc,myhf) -> tuple[np.ndarray,np.ndarray,np.ndarray,np.ndarray
 
     t_ijab = t2
     #print(t2.reshape(-1))
-    t_ijba = -np.einsum("ijab->ijba", t2,optimize='optimal')
+    t_ijba = np.einsum("ijab->ijba", t2,optimize='optimal')
 
     t2_spin = np.zeros((n_occ*2,n_occ*2,n_vir*2,n_vir*2))
     t2_spin[:n_occ,:n_occ,:n_vir,:n_vir] = t_ijab-t_ijba
     t2_spin[n_occ:,n_occ:,n_vir:,n_vir:] = t_ijab-t_ijba
     t2_spin[:n_occ,n_occ:,:n_vir,n_vir:] = t_ijab
     t2_spin[n_occ:,:n_occ,n_vir:,:n_vir] = t_ijab
-    t2_spin[n_occ:,:n_occ,:n_vir,n_vir:] = t_ijba
-    t2_spin[:n_occ,n_occ:,n_vir:,:n_vir] = t_ijba
+    t2_spin[n_occ:,:n_occ,:n_vir,n_vir:] = -t_ijba
+    t2_spin[:n_occ,n_occ:,n_vir:,:n_vir] = -t_ijba
 
     # Orbital energies
     core_e = np.array(list(myhf.mo_energy[:1]) + list(myhf.mo_energy[:1]))
@@ -311,12 +311,6 @@ def trip_excitation(hbse, n_occ_spatial, n_vir_spatial):
     
     return 0.5*hbse_new.reshape(n_occ_spatial*n_vir_spatial,n_occ_spatial*n_vir_spatial)
 
-def trip_excitation_another(hbse, n_occ_spatial, n_vir_spatial):
-    hbse_new = np.zeros((n_occ_spatial, n_vir_spatial, n_occ_spatial, n_vir_spatial))
-    hbse_new += hbse[:n_occ_spatial, :n_vir_spatial, :n_occ_spatial, :n_vir_spatial]
-    hbse_new -= hbse[n_occ_spatial:, n_vir_spatial:, n_occ_spatial:, n_vir_spatial:]
-
-    return 0.5 * hbse_new.reshape(n_occ_spatial * n_vir_spatial,n_occ_spatial * n_vir_spatial)
 
 def trip_excitation2(hbse, n_occ_spatial, n_vir_spatial):
     hbse_new = np.zeros((n_occ_spatial,n_vir_spatial,n_occ_spatial,n_vir_spatial))
@@ -327,6 +321,17 @@ def trip_excitation2(hbse, n_occ_spatial, n_vir_spatial):
     
     return 0.5*hbse_new.reshape(n_occ_spatial*n_vir_spatial,n_occ_spatial*n_vir_spatial)
 
+def sing_trip_excitations(hbse,n_occ_spatial,n_vir_spatial):
+    no = n_occ_spatial
+    nv = n_vir_spatial
+    H_aaaa = hbse[:no, :nv, :no, :nv]
+    H_aabb = hbse[:no, :nv, no:, nv:]
+    H_bbaa = hbse[no:, nv:, :no, :nv]
+    H_bbbb = hbse[no:, nv:, no:, nv:]
+    H_sing = 0.5 * (H_aaaa + H_aabb + H_bbaa + H_bbbb)
+    H_trip = 0.5 * (H_aaaa - H_aabb - H_bbaa + H_bbbb)
+    shape = (no*nv,no*nv)
+    return H_sing.reshape(shape),H_trip.reshape(shape)
 
 def match_prep(x:np.ndarray) -> np.ndarray:
     x = np.asarray(x).ravel()

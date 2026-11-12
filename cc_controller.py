@@ -44,21 +44,93 @@ print("Singlet energies (eV):", np.sort(singE_spa / eV2au)[:5])
 print("Triplet energies (eV):", np.sort(tripE_spa / eV2au)[:5])
 
 #spin
-hbse_sing, hbse_trip, selfener_occ_spin, selfener_vir_spin, fock_occ_spin, fock_vir_spin, se_occ_spin, se_vir_spin, val, singE_spin, tripE_spin= \
+hbse,hbse_sing, hbse_trip, selfener_occ_spin, selfener_vir_spin, fock_occ_spin, fock_vir_spin, se_occ_spin, se_vir_spin, val, singE_spin, tripE_spin= \
   CC_BSE_spin(mol,mo,myhf,mycc,label,eV2au,n_occ_spatial,n_vir_spatial,n_occ_spin,n_vir_spin)
 print()
 print('CC-BSE in spin basis COMPLETED.')
 print()
-# print(np.sort(val / eV2au))
+print(np.sort(val / eV2au)[:20])
 print("Singlet energies (eV):", np.sort(singE_spin / eV2au)[:5])
 print("Triplet energies (eV):", np.sort(tripE_spin / eV2au)[:5])
 
 
+# def extract_spin_energies(hbse, no, nv):
 
+#     # Spin-conserving blocks
+#     A = hbse[:no, :nv, :no, :nv]
+#     B = hbse[:no, :nv, no:, nv:]
+#     C = hbse[no:, nv:, :no, :nv]
+#     D = hbse[no:, nv:, no:, nv:]
 
+#     # Singlet and M_S = 0 triplet
+#     H_sing = 0.5 * (A + B + C + D)
+#     H_trip0 = 0.5 * (A - B - C + D)
 
+#     # Spin-flip triplet sectors
+#     H_trip_plus = hbse[:no, nv:, :no, nv:]
+#     H_trip_minus = hbse[no:, :nv, no:, :nv]
 
+#     shape = (no * nv, no * nv)
 
+#     H_sing = H_sing.reshape(shape)
+#     H_trip0 = H_trip0.reshape(shape)
+#     H_trip_plus = H_trip_plus.reshape(shape)
+#     H_trip_minus = H_trip_minus.reshape(shape)
+
+#     # Eigenvalues
+#     E_sing = np.linalg.eigvals(H_sing)
+#     E_trip0 = np.linalg.eigvals(H_trip0)
+#     E_trip_plus = np.linalg.eigvals(H_trip_plus)
+#     E_trip_minus = np.linalg.eigvals(H_trip_minus)
+
+#     return E_sing, E_trip0, E_trip_plus, E_trip_minus
+
+# E_sing, E_t0, E_tp, E_tm = extract_spin_energies(
+#     hbse, n_occ_spatial, n_vir_spatial
+# )
+
+# H_full = hbse.reshape(
+#     n_occ_spin * n_vir_spin,
+#     n_occ_spin * n_vir_spin
+# )
+
+# E_full = np.linalg.eigvals(H_full)
+
+# E_reconstructed = np.concatenate([
+#     E_sing, E_t0, E_tp, E_tm
+# ])
+
+# print("Full eigenvalues:", len(E_full))
+# print("Reconstructed eigenvalues:", len(E_reconstructed))
+
+# print(
+#     "Maximum difference:",
+#     np.max(np.abs(
+#         np.sort(E_full.real)
+#         - np.sort(E_reconstructed.real)
+#     ))
+# )
+
+# print(
+#     "Triplet M=0 vs M=+1:",
+#     np.max(np.abs(
+#         np.sort(E_t0.real) - np.sort(E_tp.real)
+#     ))
+# )
+
+# print(
+#     "Triplet M=0 vs M=-1:",
+#     np.max(np.abs(
+#         np.sort(E_t0.real) - np.sort(E_tm.real)
+#     ))
+# )
+
+# print(
+#     "Spin-flip +1 vs -1:",
+#     np.max(np.abs(
+#         np.sort(E_tp.real) - np.sort(E_tm.real)
+#     ))
+# )
 
 
 
