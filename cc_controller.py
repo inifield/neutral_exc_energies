@@ -37,21 +37,18 @@ print()
 #spin-free
 selfener_occ_spa, selfener_vir_spa, fock_occ_spa, fock_vir_spa, se_occ_spa, se_vir_spa, hbse_eig, singE_spa, tripE_spa = \
  CC_BSE_spinfree(mol,mo,myhf,mycc,t2,label,eV2au,n_occ_spatial,n_vir_spatial,n_occ_spin,n_vir_spin)
-print()
 print('CC-BSE in spin-free basis COMPLETED.')
+print("Singlet energies (eV):", np.sort(singE_spa / eV2au)[:10])
+print("Triplet energies (eV):", np.sort(tripE_spa / eV2au)[:10])
 print()
-print("Singlet energies (eV):", np.sort(singE_spa / eV2au)[:5])
-print("Triplet energies (eV):", np.sort(tripE_spa / eV2au)[:5])
 
 #spin
 hbse,hbse_sing, hbse_trip, selfener_occ_spin, selfener_vir_spin, fock_occ_spin, fock_vir_spin, se_occ_spin, se_vir_spin, val, singE_spin, tripE_spin= \
   CC_BSE_spin(mol,mo,myhf,mycc,label,eV2au,n_occ_spatial,n_vir_spatial,n_occ_spin,n_vir_spin)
-print()
 print('CC-BSE in spin basis COMPLETED.')
-print()
-print(np.sort(val / eV2au)[:20])
-print("Singlet energies (eV):", np.sort(singE_spin / eV2au)[:5])
-print("Triplet energies (eV):", np.sort(tripE_spin / eV2au)[:5])
+# print(np.sort(val / eV2au)[:20])
+print("Singlet energies (eV):", np.sort(singE_spin / eV2au)[:10])
+print("Triplet energies (eV):", np.sort(tripE_spin / eV2au)[:10])
 
 
 # def extract_spin_energies(hbse, no, nv):

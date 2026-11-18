@@ -88,6 +88,55 @@ def build_hbse_singtrip(F_ij, F_ab, nc, nv, t2, govvo, govov, goovv):
     return np.sort(np.real_if_close(SingEner)), np.sort(np.real_if_close(TripEner)) # in eV
 
 
+import numpy as np
+
+def build_hbse_singtrip2(
+    F_ij, F_ab, nc, nv, t2, govvo, govov, goovv
+):
+    # Corrected extended Fock contribution
+    fock = (
+        np.einsum("ba,ij->iajb", F_ab, np.eye(nc))
+        - np.einsum("ij,ab->iajb", F_ij, np.eye(nv))
+    )
+
+    # Corrected bare interaction
+    J = np.einsum("ibaj->iajb", govvo)
+    K = np.einsum("ibja->iajb", govov)
+
+    # Doubles contribution after spin summation
+    P = (
+        2 * np.einsum(
+            "ikac,kjcb->iajb", goovv, t2, optimize=True
+        )
+        - np.einsum(
+            "ikac,kjbc->iajb", goovv, t2, optimize=True
+        )
+        - np.einsum(
+            "ikca,kjcb->iajb", goovv, t2, optimize=True
+        )
+    )
+
+    Q = np.einsum(
+        "ikca,kjbc->iajb", goovv, t2, optimize=True
+    )
+
+    # Corrected spin-adapted Hamiltonians
+    hbseSing = fock + 2*J - K + 2*P + Q
+    hbseTrip = fock - K + Q
+
+    shape = (nc*nv, nc*nv)
+
+    H_sing = hbseSing.reshape(shape)
+    H_trip = hbseTrip.reshape(shape)
+
+    SingEner = np.linalg.eigvals(H_sing)
+    TripEner = np.linalg.eigvals(H_trip)
+
+    return (
+        np.sort(np.real_if_close(SingEner)),
+        np.sort(np.real_if_close(TripEner))
+    )
+
 
 def sing_excitation(hbse, n_occ, n_vir):
     """Build singlet excitation Hamiltonian."""
@@ -145,7 +194,7 @@ def CC_BSE_spinfree(mol,mo,myhf,mycc,t2,label,eV2au,n_occ_spatial,n_vir_spatial,
     
     term1_sum, term2_sum, hbse = build_bse_spatial(F_ij, F_ab, n_occ_spatial, n_vir_spatial, goovv, oovv, ovvo, govvo, t2)  # (n_occ,n_vir,n_occ,n_vir,nspincase)
 
-    SingEner, TripEner = build_hbse_singtrip(F_ij, F_ab, n_occ_spatial, n_vir_spatial, t2, govvo, govov, goovv)
+    SingEner, TripEner = build_hbse_singtrip2(F_ij, F_ab, n_occ_spatial, n_vir_spatial, t2, govvo, govov, goovv)
 
     eig, term1_diag, term2_diag = [], [], []
     for i in range(4): 
