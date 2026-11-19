@@ -9,12 +9,33 @@ np.set_printoptions(precision=10, suppress=True, linewidth=100000)
 eV2au = 0.0367493
 
 
-label = 'H2'
-mol = gto.M(atom="H 0.00 0.00 0.00; H 0.00 0.00 2.00",
+# label = 'H2'
+# mol = gto.M(atom="H 0.00 0.00 0.00; H 0.00 0.00 2.00",
+#             basis='aug-cc-pVTZ',
+#             spin=0,
+#             symmetry=False,
+#             unit="Bohr",verbose=0)
+
+label = 'Be'
+mol = gto.M(atom="Be 0.00000000 0.00000000 0.00000000",
             basis='aug-cc-pVTZ',
             spin=0,
             symmetry=False,
             unit="Bohr",verbose=0)
+
+# label = 'H2O'
+# mol = gto.M(
+#     atom="""
+#     O  0.000000  0.000000  0.117300 
+#     H  0.000000  0.757200 -0.469200 
+#     H  0.000000 -0.757200 -0.469200
+#     """,
+#     unit="Angstrom",
+#     basis="aug-cc-pvtz",
+#     symmetry=False,
+#     spin=0,
+#     verbose=0
+# )
 
 print()
 print(label)
@@ -35,7 +56,7 @@ print(f'nocc:{n_occ_spatial}, nvir:{n_vir_spatial}')
 print()
 
 #spin-free
-selfener_occ_spa, selfener_vir_spa, fock_occ_spa, fock_vir_spa, se_occ_spa, se_vir_spa, hbse_eig, singE_spa, tripE_spa = \
+f_ij_spatial,f_ab_spatial,sigma_occ_reference,selfener_occ_spa, selfener_vir_spa, fock_occ_spa, fock_vir_spa, se_occ_spa, se_vir_spa, hbse_eig, singE_spa, tripE_spa = \
  CC_BSE_spinfree(mol,mo,myhf,mycc,t2,label,eV2au,n_occ_spatial,n_vir_spatial,n_occ_spin,n_vir_spin)
 print('CC-BSE in spin-free basis COMPLETED.')
 print("Singlet energies (eV):", np.sort(singE_spa / eV2au)[:10])
@@ -43,12 +64,37 @@ print("Triplet energies (eV):", np.sort(tripE_spa / eV2au)[:10])
 print()
 
 #spin
-hbse,hbse_sing, hbse_trip, selfener_occ_spin, selfener_vir_spin, fock_occ_spin, fock_vir_spin, se_occ_spin, se_vir_spin, val, singE_spin, tripE_spin= \
+f_ij_spin,f_ab_spin,hbse,hbse_sing, hbse_trip, selfener_occ_spin, selfener_vir_spin, fock_occ_spin, fock_vir_spin, se_occ_spin, se_vir_spin, val, singE_spin, tripE_spin= \
   CC_BSE_spin(mol,mo,myhf,mycc,label,eV2au,n_occ_spatial,n_vir_spatial,n_occ_spin,n_vir_spin)
 print('CC-BSE in spin basis COMPLETED.')
 # print(np.sort(val / eV2au)[:20])
 print("Singlet energies (eV):", np.sort(singE_spin / eV2au)[:10])
 print("Triplet energies (eV):", np.sort(tripE_spin / eV2au)[:10])
+
+# print("Occupied fock difference", f_ij_spin[:n_occ_spatial,:n_occ_spatial]-f_ij_spatial)
+# print("Occupied self energy difference", selfener_occ_spin[:n_occ_spatial,:n_occ_spatial]-selfener_occ_spa)
+no = n_occ_spatial
+
+print(
+    "Original spatial vs spin-orbital:",
+    np.max(np.abs(
+        selfener_occ_spa - selfener_occ_spin[:no, :no]
+    ))
+)
+
+print(
+    "Reference spatial vs spin-orbital:",
+    np.max(np.abs(
+        sigma_occ_reference - selfener_occ_spin[:no, :no]
+    ))
+)
+
+print(
+    "Original spatial vs reference:",
+    np.max(np.abs(
+        selfener_occ_spa - sigma_occ_reference
+    ))
+)
 
 
 # def extract_spin_energies(hbse, no, nv):

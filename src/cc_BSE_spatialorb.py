@@ -8,7 +8,7 @@ def get_selfenergy_spatial(t2,oovv, goovv):
     selfener_occ_2 = -np.einsum('ikab, jkba -> ij', oovv, t2, optimize="optimal")
     selfener_occ_3 = np.einsum('ikab, jkab -> ij', goovv, t2, optimize="optimal")
     selfener_occ_4 = np.einsum('ikba, jkab -> ij', goovv, t2, optimize="optimal")
-    selfener_occ = 0.5*(selfener_occ_1 + selfener_occ_2 + selfener_occ_3 + selfener_occ_4)
+    selfener_occ = selfener_occ_1 + 0.5*(selfener_occ_2 + selfener_occ_3 + selfener_occ_4)
 
 
     selfener_vir_1 = np.einsum('ijbc, ijac -> ab', oovv, t2, optimize="optimal")
@@ -171,8 +171,9 @@ def CC_BSE_spinfree(mol,mo,myhf,mycc,t2,label,eV2au,n_occ_spatial,n_vir_spatial,
 
     # build fock matrix
     fock_occ, fock_vir = helper.bccd_fock_mat(mol, myhf, mycc,n_occ_spatial, n_vir_spatial,spin=False) # n_occ x n_occ, n_vir x n_vir
-    
-    
+
+    #debugging consistent error between spatial and spin self energies
+    sigma_occ_reference = np.einsum("ikab,jkab->ij",goovv,2*t2 - t2.swapaxes(2, 3),optimize="optimal")
     #debugging###########################################
     def spa_output(mol, myhf, mycc,n_occ_spatial,n_vir_spatial,t2, oovv, goovv):
       selfener_occ_spa, selfener_vir_spa = get_selfenergy_spatial(t2,oovv, goovv)
@@ -219,4 +220,4 @@ def CC_BSE_spinfree(mol,mo,myhf,mycc,t2,label,eV2au,n_occ_spatial,n_vir_spatial,
     #     f.write(f"Triplet exci./eV: {np.sort(np.real(tripE))[:10] / eV2au}\n")
     #     f.write("\n")
         
-    return selfener_occ_spa, selfener_vir_spa, fock_occ_spa, fock_vir_spa, gfock_occ, gfock_vir, eig, SingEner, TripEner
+    return F_ij, F_ab,sigma_occ_reference,selfener_occ_spa, selfener_vir_spa, fock_occ_spa, fock_vir_spa, gfock_occ, gfock_vir, eig, SingEner, TripEner
