@@ -3,7 +3,7 @@ Helper file for auxiliary codes
 """
 
 import numpy as np
-from scipy.linalg import block_diag,schur
+from scipy.linalg import block_diag
 
 
 def spinor_one_and_two_e_int(mol):
@@ -26,59 +26,9 @@ def spinor_one_and_two_e_int(mol):
     spin_eri[:n, :n, n:, n:] = eri
     spin_eri[n:, n:, :n, :n] = eri
     return np.real(spin_hcore), np.real(spin_eri)
-
-def super_matrix_solver(A, B):
-    r"""
-    Solve RPA like equations
-    :return: Eigenvalues, X, and Y matrices
-    """
-    nA = int(np.sqrt(A.size))
-    nB = int(np.sqrt(B.size))
-    A = A.reshape((nA, nA))
-    B = B.reshape((nB, nB))
-
-    # Construct supermatrix
-    supermat = np.zeros((nA+nB, nA+nB))
-    supermat[:nA, :nA] = A
-    supermat[:nA, nA:] = B
-    supermat[nA:, :nA] = -np.conj(B)
-    supermat[nA:, nA:] = -np.conj(A)
-
-    # Solve the eigenvalue problem
-    # e, v = np.linalg.eig(supermat)
-
-    t,z = schur(supermat)
-
-    if np.triu(t).all() == t.all():
-        e = np.diag(t)
-    else:
-        quit("Schur decomposition failed, matrix is not upper triangular")
-    v = z
-
-    # In our current formulation, A and B are real matrices.
-    # Eigenvalues of the supermatrix come in pairs.
-    # We take the positive ones (assuming that they mean excitation energies)
-    assert np.allclose(np.imag(e), np.zeros(e.shape), rtol=0, atol=1e-8)    # Real eigenvalues
-    e = np.real(e)
-
-    positive_idx = np.where(e > 0)[0]
-    assert len(positive_idx) == len(e) // 2     # Half of the eigenvalues should be taken
-
-    pos_e = e[positive_idx]
-    pos_v = v[:, positive_idx]
-    X = pos_v[:nA, :]
-    Y = pos_v[nA:, :]
-
-    # # assert np.allclose(np.imag(X), np.zeros(X.shape), rtol=0, atol=1e-8)    # Real eigenvalues
-    # X = np.real(X)
-    # # assert np.allclose(np.imag(Y), np.zeros(Y.shape), rtol=0, atol=1e-8)    # Real eigenvalues
-    # Y = np.real(Y)
-
-    return pos_e, X, Y
+   
     
-    
-    
-def get_spinorbs(mo:np.ndarray, n_occ_spatial) -> tuple[np.ndarray,np.ndarray]:
+def get_spinorbs(mo:np.ndarray, n_occ_spa:int) -> tuple[np.ndarray,np.ndarray]:
     """Gets the core and virtual spin orbitals from a list of molecular orbitals.
 
     Parameters
@@ -93,89 +43,17 @@ def get_spinorbs(mo:np.ndarray, n_occ_spatial) -> tuple[np.ndarray,np.ndarray]:
     """
 
     # Core and Virtual Orbitals (spatial orbital basis)
-    core_spatialorbs = mo[:,:n_occ_spatial]
-    #.reshape(-1,n_occ_spatial)
-    vir_spatialorbs = mo[:,n_occ_spatial:]
-    #.reshape(-1,n_vir_spatial)
-    #print(f"core spatial shape: {core_spatialorbs.shape}")
-    #print(f"vir spatial shape: {vir_spatialorbs.shape}")
+    core_spatialorbs = mo[:,:n_occ_spa]
+    vir_spatialorbs = mo[:,n_occ_spa:]
     
     # Convert core and virtual orbitals into spin-orbital form. The first half of the columns will be alpha spin orbs, the
     # next half of the columns will be beta spin orbs
     core_spinorbs = block_diag(core_spatialorbs, core_spatialorbs)
     vir_spinorbs = block_diag(vir_spatialorbs, vir_spatialorbs)
 
-    n_occ = core_spinorbs.shape[1]
-    n_vir = vir_spinorbs.shape[1]
-    #print(f"n_occ = {n_occ}, n_vir = {n_vir}")
-
     return core_spinorbs, vir_spinorbs
 
-def get_self_energy(t2:np.ndarray, oovv:np.ndarray) -> tuple[np.ndarray,np.ndarray]:
-    """Calculates the self energy using t2 CC amplitudes. Equ 49 and 50 in the Paper.
-
-    Parameters
-    ----------
-    t2 : np.ndarray
-        t2 amplitudes
-    oovv : np.ndarray
-        anti symmetrised integral of occupied, occupied, virtual, virtual
-
-    Returns
-    -------
-    tuple[np.ndarray,np.ndarray]
-        occupied self energy, virtual self energy 
-    """
-    occ_selfeng = 0.5 * np.einsum("ikab,jkab -> ij", oovv,t2,optimize="optimal")
-    vir_selfeng = -0.5 * np.einsum("ijbc,ijac -> ab", oovv,t2,optimize="optimal")
-
-    return occ_selfeng, vir_selfeng
-
-def build_fock_matrices(mol,n_occ:int,n_vir:int)-> tuple[np.ndarray,np.ndarray]:
-    """Generates the occupied and virtual fock matrices using PySCF.
-
-    Parameters
-    ----------
-    mol : gto.Mole
-        The molecule to calculate this for.
-    n_occ : int
-        The number of occupied spin orbitals.
-    n_vir : int
-        The number of virtual spin orbitals.
-
-    Returns
-    -------
-    tuple[np.ndarray,np.ndarray]
-        The occupied fock matrix, the virtual fock matrix.
-    """
-
-    mf = scf.HF(mol)     
-    mf.kernel()          
-    F_ao = mf.get_fock()    
-    C   = mf.mo_coeff        
-    F_mo = C.T @ F_ao @ C   
-    fock_occ = F_mo[:int(n_occ/2),:int(n_occ/2)]
-    fock_vir = F_mo[int(n_occ/2):,int(n_occ/2):]
-
-    #TODO: COME BACK AND GENERALISE TO LARGER SYSTEMS
-    spat_occ = int(n_occ/2)
-    spat_vir = int(n_vir/2)
-    
-    fock_occ_spin = np.zeros((n_occ,n_occ))
-    fock_vir_spin = np.zeros((n_vir,n_vir))
-
-    fock_occ_spin[:spat_occ,:spat_occ] = fock_occ
-    fock_occ_spin[spat_occ:,spat_occ:] = fock_occ
-
-    fock_vir_spin[:spat_vir,:spat_vir] = fock_vir
-    fock_vir_spin[spat_vir:,spat_vir:] = fock_vir
-
-    return fock_occ_spin, fock_vir_spin
-
-def build_double_ints(core_spinorbs:np.ndarray,
-                      vir_spinorbs:np.ndarray,
-                      eri_ao:np.ndarray
-                      )-> tuple[np.ndarray,np.ndarray,np.ndarray,np.ndarray,np.ndarray]:
+def build_double_ints(core_spinorbs:np.ndarray,vir_spinorbs:np.ndarray,eri_ao:np.ndarray)-> tuple[np.ndarray,np.ndarray,np.ndarray,np.ndarray,np.ndarray]:
     """Generates either symmetrised or anti-symmetrised double integrals depending on the list of electron repulsion integrals passed as an argument.
 
     Parameters
@@ -185,7 +63,7 @@ def build_double_ints(core_spinorbs:np.ndarray,
     vir_spinorbs : np.ndarray
         List of virtual spin orbitals.
     eri_ao : np.ndarray
-        List of electron repulsion integrals.
+        List of electron repulsion integrals, symmetrised or anti-symmetrised
 
     Returns
     -------
@@ -195,7 +73,7 @@ def build_double_ints(core_spinorbs:np.ndarray,
     """
 
 
-    # Build the required anti-symmetrised orbitals
+    # Build the required symmetrised or antisymmetrised integrals
     oovv = np.einsum("pi,qj,pqrs,ra,sb->ijab", core_spinorbs, core_spinorbs, eri_ao, vir_spinorbs, vir_spinorbs, optimize="optimal")
     ooov =  np.einsum("pi,qk,pqrs,rj,sc->ikjc",core_spinorbs,core_spinorbs,eri_ao,core_spinorbs,vir_spinorbs,optimize="optimal") 
     vovv =  np.einsum("pa,qk,pqrs,rb,sc->akbc",vir_spinorbs,core_spinorbs,eri_ao,vir_spinorbs,vir_spinorbs,optimize="optimal") 
@@ -204,64 +82,33 @@ def build_double_ints(core_spinorbs:np.ndarray,
 
     return oovv,ooov,vovv,ovvo,ovov
 
-def bccd_t2_amps(mycc,myhf) -> tuple[np.ndarray,np.ndarray,np.ndarray,np.ndarray, int, int]:
-    """ Calculates the bccd amplitudes as well as returing the molecular orbitals and orbital energies.
-
-    Parameters
-    ----------
-    mol : gto.Mole
-        The molecule to calculate this for.s
+def build_t2_spin(t2_spa:np.ndarray,n_occ_spa:int,n_vir_spa:int) -> np.ndarray:
+    """ Returns the t2_spin coefficients utilising spin symmetry of closed-shell system
 
     Returns
     -------
     tuple[np.ndarray,np.ndarray,np.ndarray,np.ndarray]
         molecular orbitals, t2 amplitudes, core orbital energies, virtual orbital energies.
     """
-    # myhf = mol.HF.run() 
-    # mycc = cc.BCCD(myhf,max_cycle = 200, conv_tol_normu=1e-8).run()
 
-    #print(mycc.e_tot)
-    mo = mycc.mo_coeff
-    t2 = mycc.t2
+    t_ijab = t2_spa
+    t_ijba = np.einsum("ijab->ijba", t2_spa,optimize='optimal')
 
-    # Get number of spatial orbitals
-    n_occ = t2.shape[0]
-    n_vir = t2.shape[2]
+    t2_spin = np.zeros((n_occ_spa*2,n_occ_spa*2,n_vir_spa*2,n_vir_spa*2))
+    t2_spin[:n_occ_spa,:n_occ_spa,:n_vir_spa,:n_vir_spa] = t_ijab-t_ijba
+    t2_spin[n_occ_spa:,n_occ_spa:,n_vir_spa:,n_vir_spa:] = t_ijab-t_ijba
+    t2_spin[:n_occ_spa,n_occ_spa:,:n_vir_spa,n_vir_spa:] = t_ijab
+    t2_spin[n_occ_spa:,:n_occ_spa,n_vir_spa:,:n_vir_spa] = t_ijab
+    t2_spin[n_occ_spa:,:n_occ_spa,:n_vir_spa,n_vir_spa:] = -t_ijba
+    t2_spin[:n_occ_spa,n_occ_spa:,n_vir_spa:,:n_vir_spa] = -t_ijba
 
-    t_ijab = t2
-    #print(t2.reshape(-1))
-    t_ijba = np.einsum("ijab->ijba", t2,optimize='optimal')
+    return t2_spin
 
-    t2_spin = np.zeros((n_occ*2,n_occ*2,n_vir*2,n_vir*2))
-    t2_spin[:n_occ,:n_occ,:n_vir,:n_vir] = t_ijab-t_ijba
-    t2_spin[n_occ:,n_occ:,n_vir:,n_vir:] = t_ijab-t_ijba
-    t2_spin[:n_occ,n_occ:,:n_vir,n_vir:] = t_ijab
-    t2_spin[n_occ:,:n_occ,n_vir:,:n_vir] = t_ijab
-    t2_spin[n_occ:,:n_occ,:n_vir,n_vir:] = -t_ijba
-    t2_spin[:n_occ,n_occ:,n_vir:,:n_vir] = -t_ijba
-
-    # Orbital energies
-    core_e = np.array(list(myhf.mo_energy[:1]) + list(myhf.mo_energy[:1]))
-    vir_e = np.array(list(myhf.mo_energy[1:]) + list(myhf.mo_energy[1:]))
-
-    return mo, t2_spin, core_e, vir_e, n_occ, n_vir
-
-def bccd_fock_mat(mol, myhf, mycc,n_occ,n_vir,spin:bool=False)-> tuple[np.ndarray,np.ndarray]:
+def bccd_fock_mat(mol,bmo:np.ndarray,n_occ_spa:int,n_vir_spa:int,spin:bool=False)-> tuple[np.ndarray,np.ndarray]:
     # SPATIAL OCCUPIED AND SPATIAL VIRTUAL      
-
-    # myhf = mol.HF.run() 
-    # mycc = cc.BCCD(myhf,max_cycle = 200, conv_tol_normu=1e-8).run()
-      
-    F_ao = myhf.get_fock()    
-    C   = myhf.mo_coeff        
-    F_mo = C.T @ F_ao @ C   
-    fock_occ = F_mo[:int(n_occ),:int(n_occ)]
-    fock_vir = F_mo[int(n_occ):,int(n_occ):]
-
     hcore = mol.intor("int1e_kin") + mol.intor("int1e_nuc")
-    bmo = mycc.mo_coeff
-    bmo_occ = bmo[:, :int(n_occ)]
-    bmo_vir = bmo[:, int(n_occ):]
+    bmo_occ = bmo[:, :n_occ_spa]
+    bmo_vir = bmo[:, n_occ_spa:]
 
     hcore_occ = np.einsum("pi,pq,qj->ij", bmo_occ, hcore, bmo_occ, optimize="optimal")
     hcore_vir = np.einsum("pi,pq,qj->ij", bmo_vir, hcore, bmo_vir, optimize="optimal")#
@@ -273,89 +120,33 @@ def bccd_fock_mat(mol, myhf, mycc,n_occ,n_vir,spin:bool=False)-> tuple[np.ndarra
                 2 * np.einsum("pi,qk,pqrs,rj,sk->ij", bmo_vir, bmo_occ, eri, bmo_vir, bmo_occ, optimize="optimal") -\
                 np.einsum("pi,qk,pqrs,sj,rk->ij", bmo_vir, bmo_occ, eri, bmo_vir, bmo_occ, optimize="optimal")
     
-    #print(fock_vir.shape)
-    #print(fock_occ.shape)
     
     if spin:
         # times two for two spin cases.
-        fock_occ_spin = np.zeros((n_occ*2,n_occ*2))
-        fock_vir_spin = np.zeros((n_vir*2,n_vir*2))
+        fock_occ_spin = np.zeros((n_occ_spa*2,n_occ_spa*2))
+        fock_vir_spin = np.zeros((n_vir_spa*2,n_vir_spa*2))
 
-        fock_occ_spin[:n_occ,:n_occ] = fock_occ
-        fock_occ_spin[n_occ:,n_occ:] = fock_occ
+        fock_occ_spin[:n_occ_spa,:n_occ_spa] = fock_occ
+        fock_occ_spin[n_occ_spa:,n_occ_spa:] = fock_occ
 
-        fock_vir_spin[:n_vir,:n_vir] = fock_vir
-        fock_vir_spin[n_vir:,n_vir:] = fock_vir
+        fock_vir_spin[:n_vir_spa,:n_vir_spa] = fock_vir
+        fock_vir_spin[n_vir_spa:,n_vir_spa:] = fock_vir
 
         return fock_occ_spin, fock_vir_spin
     else:
         return fock_occ, fock_vir
 
-# SPIN 
-def sing_excitation(hbse, n_occ_spatial, n_vir_spatial):
-    #print(hbse.dtype)
-    hbse_new = np.zeros((n_occ_spatial,n_vir_spatial,n_occ_spatial,n_vir_spatial))
-    hbse_new += hbse[:n_occ_spatial,:n_vir_spatial,:n_occ_spatial,:n_vir_spatial] #iajb->a,a,a,a
-    hbse_new += hbse[n_occ_spatial:,:n_vir_spatial,:n_occ_spatial,n_vir_spatial:] #iajb->baab
-    hbse_new += hbse[:n_occ_spatial,n_vir_spatial:,n_occ_spatial:,:n_vir_spatial] #iajb->abba
-    hbse_new += hbse[n_occ_spatial:,n_vir_spatial:,n_occ_spatial:,n_vir_spatial:] #iajb->bbbb
-    
-    return 0.5*hbse_new.reshape(n_occ_spatial*n_vir_spatial,n_occ_spatial*n_vir_spatial)
-
-def trip_excitation(hbse, n_occ_spatial, n_vir_spatial):
-    hbse_new = np.zeros((n_occ_spatial,n_vir_spatial,n_occ_spatial,n_vir_spatial))
-    hbse_new += hbse[:n_occ_spatial,:n_vir_spatial,:n_occ_spatial,:n_vir_spatial] #iajb->a,a,a,a
-    hbse_new -= hbse[n_occ_spatial:,:n_vir_spatial,:n_occ_spatial,n_vir_spatial:] #iajb->baab
-    hbse_new -= hbse[:n_occ_spatial,n_vir_spatial:,n_occ_spatial:,:n_vir_spatial] #iajb->abba
-    hbse_new += hbse[n_occ_spatial:,n_vir_spatial:,n_occ_spatial:,n_vir_spatial:] #iajb->bbbb
-    
-    return 0.5*hbse_new.reshape(n_occ_spatial*n_vir_spatial,n_occ_spatial*n_vir_spatial)
-
-
-def trip_excitation2(hbse, n_occ_spatial, n_vir_spatial):
-    hbse_new = np.zeros((n_occ_spatial,n_vir_spatial,n_occ_spatial,n_vir_spatial))
-    hbse_new += hbse[:n_occ_spatial,n_vir_spatial:,:n_occ_spatial,n_vir_spatial:] #iajb->abab
-    hbse_new -= hbse[:n_occ_spatial,n_vir_spatial:,n_occ_spatial:,:n_vir_spatial] #iajb->abba
-    hbse_new -= hbse[n_occ_spatial:,:n_vir_spatial,:n_occ_spatial,n_vir_spatial:] #iajb->baab
-    hbse_new += hbse[n_occ_spatial:,:n_vir_spatial,n_occ_spatial:,:n_vir_spatial] #iajb->baba
-    
-    return 0.5*hbse_new.reshape(n_occ_spatial*n_vir_spatial,n_occ_spatial*n_vir_spatial)
-
-def sing_trip_excitations(hbse,n_occ_spatial,n_vir_spatial):
-    no = n_occ_spatial
-    nv = n_vir_spatial
-    H_aaaa = hbse[:no, :nv, :no, :nv]
-    H_aabb = hbse[:no, :nv, no:, nv:]
-    H_bbaa = hbse[no:, nv:, :no, :nv]
-    H_bbbb = hbse[no:, nv:, no:, nv:]
+# SPIN PROJECTION
+def sing_trip_excitations(hbse:np.ndarray,n_occ_spa:int,n_vir_spa:int) -> tuple[np.ndarray,np.ndarray]:
+    H_aaaa = hbse[:n_occ_spa, :n_vir_spa, :n_occ_spa, :n_vir_spa]
+    H_aabb = hbse[:n_occ_spa, :n_vir_spa, n_occ_spa:, n_vir_spa:]
+    H_bbaa = hbse[n_occ_spa:, n_vir_spa:, :n_occ_spa, :n_vir_spa]
+    H_bbbb = hbse[n_occ_spa:, n_vir_spa:, n_occ_spa:, n_vir_spa:]
     H_sing = 0.5 * (H_aaaa + H_aabb + H_bbaa + H_bbbb)
     H_trip = 0.5 * (H_aaaa - H_aabb - H_bbaa + H_bbbb)
-    shape = (no*nv,no*nv)
+    shape = (n_occ_spa*n_vir_spa,n_occ_spa*n_vir_spa)
     return H_sing.reshape(shape),H_trip.reshape(shape)
 
-def match_prep(x:np.ndarray) -> np.ndarray:
-    x = np.asarray(x).ravel()
-    if np.iscomplexobj(x) and np.max(np.abs(x.imag)) < 1e-10:
-        x = x.real
-    return x[np.isfinite(x)]
-
-def count_matches(spa, spin, label, atol=1e-4, rtol=0.0):
-    a = np.sort(match_prep(spa))
-    b = np.sort(match_prep(spin))
-    matches = np.any(np.isclose(a[:, None], b[None, :], atol=atol, rtol=rtol), axis=1)
-    print(f"{label}: {int(matches.sum())}/{int(matches.size)} matched (atol={atol}, rtol={rtol})")
-
-
-def diagonalise(matrix: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
-    """Diagonalise a matrix and return eigenvalues and eigenvectors."""
-    e,v = schur(matrix)
-    if not np.allclose(np.triu(e), e, atol=1e-8):
-        raise ValueError("Schur decomposition failed, matrix is not upper triangular.")
-    # Check if eigenvalues are real
-    if not np.allclose(np.imag(e), 0, atol=1e-8):
-        raise ValueError("Eigenvalues are not real.")
-    e = np.real(e)
-    return e, v
 
 
 
