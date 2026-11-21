@@ -1,7 +1,6 @@
 import numpy as np
 from pyscf import gto, scf, cc
 import src.BSE_Helper as helper
-from scipy.linalg.lapack import dgeev 
 
 def get_self_energy(t2_spin:np.ndarray, oovv:np.ndarray) -> tuple[np.ndarray,np.ndarray]:
 
@@ -58,12 +57,7 @@ def CC_BSE_spin(mol,mo,t2_spa,n_occ_spa,n_vir_spa):
 
     # (n_occ,n_vir,n_occ,n_vir,nspincase)
     ext_fock, Hbare, Ht2, hbse = build_hbse_spin(F_ij,F_ba,ovvo,oovv,t2_spin,n_occ_spin,n_vir_spin)
-    H = hbse.reshape((n_occ_spin*n_vir_spin,n_occ_spin*n_vir_spin))
-    eig = np.linalg.eigvals(H)
 
-    hbse_sing,hbse_trip = helper.sing_trip_excitations(hbse, n_occ_spa, n_vir_spa)
+    hbse_sing, hbse_trip = helper.sing_trip_excitations(hbse, n_occ_spa, n_vir_spa)
 
-    singE,_,_,_,_ = dgeev(hbse_sing)
-    tripE,_,_,_,_ = dgeev(hbse_trip)
-
-    return singE, tripE, eig, hbse, hbse_sing, hbse_trip, Hbare, Ht2, ext_fock, fock_occ, fock_vir, occ_selfener, vir_selfener
+    return hbse, hbse_sing, hbse_trip, Hbare, Ht2, ext_fock, fock_occ, fock_vir, occ_selfener, vir_selfener

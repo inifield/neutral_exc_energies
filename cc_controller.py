@@ -1,89 +1,96 @@
 import numpy as np
-from pyscf import gto, scf, cc, lib
+import sys
+from pyscf import gto, cc, lib
 
-import src.BSE_Helper as helper
+from src.BSE_Helper import lowest_eigvals as eigvals
 from src.cc_BSE_spatialorb import CC_BSE_spatial
 from src.cc_BSE_spinorb import CC_BSE_spin
-from pyscf.data.nist import HARTREE2EV
 
 np.set_printoptions(precision=10, suppress=True, linewidth=100000)
 
+#Define set of molecules
+molecules = {
+    "H2": {
+        "atom": "H 0 0 0; H 0 0 2.00",
+        "unit": "Bohr", "spin": 0, "symmetry": False},
 
-# label = 'H2'
-# mol = gto.M(atom="H 0.00 0.00 0.00; H 0.00 0.00 2.00",
-#             basis='aug-cc-pVTZ',
-#             spin=0,
-#             symmetry=False,
-#             unit="Bohr",verbose=0)
+    "Be": {
+        "atom": "Be 0 0 0",
+        "unit": "Bohr", "spin": 0, "symmetry": False},
 
-label = 'Be'
-mol = gto.M(atom="Be 0.00000000 0.00000000 0.00000000",
-            basis='aug-cc-pVTZ',
-            spin=0,
-            symmetry=False,
-            unit="Bohr",verbose=0)
+    "H2O": {
+        "atom": """
+        O  0.000000  0.000000  0.117300
+        H  0.000000  0.757200 -0.469200
+        H  0.000000 -0.757200 -0.469200
+        """,
+        "unit": "Angstrom", "spin": 0, "symmetry": False}
+}
 
-# label = 'H2O'
-# mol = gto.M(
-#     atom="""
-#     O  0.000000  0.000000  0.117300 
-#     H  0.000000  0.757200 -0.469200 
-#     H  0.000000 -0.757200 -0.469200
-#     """,
-#     unit="Angstrom",
-#     basis="aug-cc-pVTZ",
-#     symmetry=False,
-#     spin=0,
-#     verbose=0
-# )
+# Select molecule from terminal command
+label = sys.argv[1] if len(sys.argv) > 1 else "Be"
+
+if label not in molecules:
+    raise ValueError(
+        f"Unknown molecule '{label}'. "
+        f"Available: {list(molecules)}"
+    )
+
+# Construct molecule and specify basis set
+mol = gto.M(
+    **molecules[label],
+    basis = "aug-cc-pVTZ",
+    verbose=0
+)
 
 print()
 print(label)
 print()
 
+#Perform BCCD and return the MO coefficients and doubles amplitudes
 myhf = mol.HF().run() 
 mycc = cc.BCCD(myhf,max_cycle = 200, conv_tol_normu=1e-8).run()
 mo = mycc.mo_coeff
 t2 = mycc.t2
 
-n_occ_spatial = int(t2.shape[0])
-n_vir_spatial = int(t2.shape[2])
+#Number of occupied and virtual MOs
+n_occ_spa = int(t2.shape[0])
+n_vir_spa = int(t2.shape[2])
 
-print(f'nocc:{n_occ_spatial}, nvir:{n_vir_spatial}')
+print(f'nocc:{n_occ_spa}, nvir:{n_vir_spa}')
 print()
 
-#spin-free
-singE_spa, tripE_spa, ext_fock, Hbaresing, Ht2sing, Hbaretrip, Ht2trip,_,_,_,_,_,_ = CC_BSE_spatial(mol,mo,t2,n_occ_spatial,n_vir_spatial)
+#Performs spin-adapted (spatial) calculation and returns lowest singlet/triplet excitation energies
+H_sing_spa,H_trip_spa,ext_fock, Hbaresing, Ht2sing, Hbaretrip, Ht2trip,_,_,_,_ = CC_BSE_spatial(mol,mo,t2,n_occ_spa,n_vir_spa)
 print('CC-BSE in spin-free basis COMPLETED.')
-print("Singlet energies (eV):", np.sort(singE_spa * HARTREE2EV)[:10])
-print("Triplet energies (eV):", np.sort(tripE_spa * HARTREE2EV)[:10])
+print("Singlet energies (eV):", eigvals(H_sing_spa,10))
+print("Triplet energies (eV):", eigvals(H_trip_spa,10))
 print()
 
-def lowest_eigenvalues(H, n=5):
-    N = H.shape[0] * H.shape[1]
-    matrix = H.reshape(N, N)
+#Performs spin-orbital calculation and returns lowest singlet/triplet excitation energies
+Hbse,H_sing_spin,H_trip_spin,_,_,_,_,_,_,_ = CC_BSE_spin(mol,mo,t2,n_occ_spa,n_vir_spa)
+print('CC-BSE in spin basis COMPLETED.')
+print("Singlet energies (eV):", eigvals(H_sing_spin,10))
+print("Triplet energies (eV):", eigvals(H_trip_spin,10))
 
-    eig = np.linalg.eigvals(matrix)
-    eig = np.real_if_close(eig)
-
-    return np.sort(eig)[:n] * HARTREE2EV
-
+#Calculates eigenvalues of separate contributions to singlet and triplet BSE Hamiltonians
 print("Fock only:")
-print(lowest_eigenvalues(ext_fock))
+print(eigvals(ext_fock))
 
 print("Fock + bare interaction, singlet:")
-print(lowest_eigenvalues(ext_fock + Hbaresing))
+print(eigvals(ext_fock + Hbaresing))
 
 print("Full CC-BSE singlets:")
-print(lowest_eigenvalues(ext_fock + Hbaresing + Ht2sing))
+print(eigvals(ext_fock + Hbaresing + Ht2sing))
+
+print("Fock + bare interaction, triplet:")
+print(eigvals(ext_fock + Hbaretrip))
+
+print("Full CC-BSE triplets:")
+print(eigvals(ext_fock + Hbaretrip + Ht2trip))
 print()
 
-#spin
-singE_spin, tripE_spin, allE_spin,_,_,_,_,_,_,_,_,_,_ = CC_BSE_spin(mol,mo,t2,n_occ_spatial,n_vir_spatial)
-print('CC-BSE in spin basis COMPLETED.')
-# print(np.sort(allE_spin * HARTREE2EV)[:20])
-print("Singlet energies (eV):", np.sort(singE_spin * HARTREE2EV)[:10])
-print("Triplet energies (eV):", np.sort(tripE_spin * HARTREE2EV)[:10])
+
 
 
 
