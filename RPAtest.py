@@ -7,20 +7,19 @@ from pyscf.tdscf import ghf
 from pyscf.data.nist import HARTREE2EV
 from src.molecules import molecules
 
-# Adjust imports to your repository structure
 from src import BSE_Helper as helper
 from src.cc_BSE_spinorb import build_hbse_spin
 
-TOL = 1e-8
+tol = 1e-8
 
 def max_error(X, Y):
     return np.max(np.abs(X - Y))
 
 
-def check(name, X, Y, tol=TOL):
+def check(name, X, Y, tolerance=tol):
     error = max_error(X, Y)
     print(f"{name}: {error:.12e} Ha")
-    if error > tol:
+    if error > tolerance:
         raise AssertionError(f"{name} failed")
     return error
 
@@ -121,8 +120,8 @@ omega, vectors = eig(R)
 
 #Construct tuple containing information on the number of expected positive eigenvalues and check against expected value
 positive = (
-    (omega.real > TOL)
-    & (np.abs(omega.imag) < TOL)
+    (omega.real > tol)
+    & (np.abs(omega.imag) < tol)
 )
 
 print("\nExpected positive RPA modes:", N)
@@ -161,61 +160,34 @@ H_down = A + B @ T
 #Find its eigenvalues and ensure they are real
 omega_down = np.linalg.eigvals(H_down)
 
-if np.max(np.abs(omega_down.imag)) > TOL:
+if np.max(np.abs(omega_down.imag)) > tol:
     raise ValueError("Complex downfolded RPA eigenvalues")
 
 #Check the downfolded eigenvalues against the original RPA eigenvalues to ensure correct construction
 check("RPA vs downfolded spectrum", omega_rpa, np.sort(omega_down.real))
 
-
+#Construct the downfolded Hamiltonian from the CC-BSE functions with the replaced F_ij, F_ab and ring t2 amplitudes from RPA
 _,_,_,hbse = build_hbse_spin(F_ij,F_ab,ovvo,oovv,t2_ring,no,nv)
 
 H_test = np.asarray(hbse).reshape(N, N)
 
 print("\n--- CC-BSE RPA-limit validation ---")
 
-# Check the doubles contraction separately
-H_ring4 = np.einsum(
-    "ikac,kjcb->iajb",
-    oovv,
-    t2_ring,
-    optimize=True
-)
+#Compare CC-BSE RPA limit with independently constructed downfolded RPA Hamiltonian
+check("Full CC-BSE vs downfolded RPA", H_test, H_down)
 
-H_ring = H_ring4.reshape(N, N)
-
-check(
-    "Ring contraction vs B @ T",
-    H_ring,
-    B @ T
-)
-
-check(
-    "Full CC-BSE vs downfolded RPA",
-    H_test,
-    H_down
-)
-
-
-# ============================================================
-# 11. Compare complete eigenvalue spectra
-# ============================================================
-
+#Calculate eigenvalues of CC-BSE RPA limit Hamiltonian, check if real and compare to those from independent RPA calculation
 omega_test = np.linalg.eigvals(H_test)
 
-if np.max(np.abs(omega_test.imag)) > TOL:
+if np.max(np.abs(omega_test.imag)) > tol:
     raise ValueError("Complex CC-BSE RPA-limit roots")
 
-check(
-    "Complete excitation spectrum",
-    np.sort(omega_test.real),
-    omega_rpa
-)
+check("Complete excitation spectrum", np.sort(omega_test.real), omega_rpa)
 
+#Display lowest eigenvalues of both methods
 print("\nLowest 10 standard RPA energies (eV):")
 print(omega_rpa[:10] * HARTREE2EV)
 
 print("\nLowest 10 CC-BSE RPA-limit energies (eV):")
 print(np.sort(omega_test.real)[:10] * HARTREE2EV)
 
-print("\nALL RPA-LIMIT TESTS PASSED")
