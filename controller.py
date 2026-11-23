@@ -5,30 +5,13 @@ from pyscf import gto, cc, lib
 from src.BSE_Helper import lowest_eigvals as eigvals
 from src.cc_BSE_spatialorb import CC_BSE_spatial
 from src.cc_BSE_spinorb import CC_BSE_spin
+from src.molecules import molecules
 
 np.set_printoptions(precision=10, suppress=True, linewidth=100000)
 
-#Define set of molecules
-molecules = {
-    "H2": {
-        "atom": "H 0 0 0; H 0 0 2.00",
-        "unit": "Bohr", "spin": 0, "symmetry": False},
-
-    "Be": {
-        "atom": "Be 0 0 0",
-        "unit": "Bohr", "spin": 0, "symmetry": False},
-
-    "H2O": {
-        "atom": """
-        O  0.000000  0.000000  0.117300
-        H  0.000000  0.757200 -0.469200
-        H  0.000000 -0.757200 -0.469200
-        """,
-        "unit": "Angstrom", "spin": 0, "symmetry": False}
-}
 
 # Select molecule from terminal command
-label = sys.argv[1] if len(sys.argv) > 1 else "Be"
+label = sys.argv[1] if len(sys.argv) > 1 else "H2"
 
 if label not in molecules:
     raise ValueError(
