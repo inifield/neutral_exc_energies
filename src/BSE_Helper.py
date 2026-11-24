@@ -183,10 +183,12 @@ def sing_trip_excitations(hbse:np.ndarray,n_occ_spa:int,n_vir_spa:int) -> tuple[
     return H_sing, H_trip
 
 def lowest_eigvals(mat, n=5):
-    N = mat.shape[0] * mat.shape[1]
-    matrix = mat.reshape(N, N)
+    dim = mat.ndim
+    if dim == 4:
+        N = mat.shape[0] * mat.shape[1]
+        mat = mat.reshape(N, N)
 
-    eig,_,_,_,_ = dgeev(matrix)
+    eig,_,_,_,_ = dgeev(mat)
 
     return np.sort(eig)[:n] * HARTREE2EV
 

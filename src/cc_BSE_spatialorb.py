@@ -59,4 +59,4 @@ def CC_BSE_spatial(mol,mo,t2_spa,n_occ_spa,n_vir_spa):
 
     hbse_sing, hbse_trip,ext_fock,Hbaresing,Ht2sing,Hbaretrip,Ht2trip = build_hbse_singtrip(F_ij, F_ab, t2_spa, govvo, govov, goovv, n_occ_spa, n_vir_spa)
         
-    return hbse_sing, hbse_trip, ext_fock, Hbaresing, Ht2sing, Hbaretrip, Ht2trip, fock_occ, fock_vir, selfener_occ, selfener_vir
+    return hbse_sing, hbse_trip, ext_fock, Hbaresing, Ht2sing, Hbaretrip, Ht2trip, F_ij, F_ab, fock_occ, fock_vir, selfener_occ, selfener_vir
