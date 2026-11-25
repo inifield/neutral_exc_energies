@@ -10,7 +10,7 @@ from src.cc_BSE_spinorb import CC_BSE_spin
 
 np.set_printoptions(precision=10, suppress=True, linewidth=100000)
 
-#Ensures results are printed to terminal and output file
+#Ensures results are printed to terminal and output file if --save is called
 class Tee:
     def __init__(self, file):
         self.file = file
@@ -23,11 +23,6 @@ class Tee:
     def flush(self):
         self.terminal.flush()
         self.file.flush()
-
-#MAIN CONTROL PARAMETERS
-max_cycle = 200
-tol = 1e-8
-BASIS = "aug-cc-pVTZ"
 
 #Functions that control time measurings
 def start_timer():
@@ -61,9 +56,14 @@ else:
         selected.append(label_lookup[label.casefold()])
 
         
+#MAIN CONTROL PARAMETERS
+max_cycle = 200
+tol = 1e-8
+BASIS = "aug-cc-pVTZ"
+spin_orb_calc = False
 
-
-def perform_calculation(label,basis_set,tol,max_cycle):
+#Function which actually performs CC-BSE calculation
+def perform_calculation(label,basis_set,tol,max_cycle,spin=False):
 
     timings = {}
     xyz_file = Path("geometries") / f"{label}.xyz"
@@ -119,8 +119,19 @@ def perform_calculation(label,basis_set,tol,max_cycle):
     print("Singlet excitation energies (eV):", eigvals(H_sing_spa,10))
     print("\nFock and bare contribution, triplet (eV):", eigvals(ext_fock+Hbaretrip,10))
     print("Triplet excitation energies (eV):", eigvals(H_trip_spa,10))
-
     save_timer("Matrix diagonalisation",t0, timings)
+
+    if spin:
+        #Performs spin-orbital calculation and projects out singlet/triplet excitation energies
+        t0 = start_timer()
+        _,H_sing_spin,H_trip_spin,_,_,_,_,_,_,_ = CC_BSE_spin(mol,mo,t2,n_occ_spa,n_vir_spa)
+        save_timer("Spin orbit CC-BSE", t0, timings)
+
+        t0 = start_timer()
+        print("\n========== FULL SPIN ORBITAL CC-BSE ==========")
+        print("Singlet energies (eV):", eigvals(H_sing_spin,10))
+        print("Triplet energies (eV):", eigvals(H_trip_spin,10))
+        save_timer("Spin orbit diagonalisation", t0, timings)
 
     print("\n========== CALCULATION TIMINGS ==========")
     print(f"{'Component':<32} {'CPU (s)':>12} {'Wall (s)':>12}")
@@ -133,23 +144,20 @@ def perform_calculation(label,basis_set,tol,max_cycle):
         f"{sum(x[0] for x in timings.values()):>12.6f} "
         f"{sum(x[1] for x in timings.values()):>12.6f}")
 
-    # #Performs spin-orbital calculation and returns lowest singlet/triplet excitation energies
-    # Hbse,H_sing_spin,H_trip_spin,_,_,_,_,_,_,_ = CC_BSE_spin(mol,mo,t2,n_occ_spa,n_vir_spa)
-    # print('CC-BSE in spin basis COMPLETED.')
-    # print("Singlet energies (eV):", eigvals(H_sing_spin,10))
-    # print("Triplet energies (eV):", eigvals(H_trip_spin,10))
-
 for label in selected:
     if args.save:
-        with open(f"results/{label}.txt","w",buffering=1) as output_file:
+        with open(f"results/{label}.txt","a",buffering=1) as output_file:
+            output_file.write(f"\n{'=' * 200}\n")
+            output_file.write(f"{'=' * 200}\n\n\n")
+
             original_stdout = sys.stdout
             sys.stdout = Tee(output_file)
             try:
-                perform_calculation(label,BASIS,tol,max_cycle)
+                perform_calculation(label,BASIS,tol,max_cycle,spin_orb_calc)
             finally:
                 sys.stdout = original_stdout
     else:
-        perform_calculation(label,BASIS,tol,max_cycle)
+        perform_calculation(label,BASIS,tol,max_cycle,spin_orb_calc)
 
 
 

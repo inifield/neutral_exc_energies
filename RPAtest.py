@@ -7,7 +7,7 @@ from pyscf.tdscf import ghf
 from pyscf.data.nist import HARTREE2EV
 from src.molecules import molecules
 
-from src import BSE_Helper as helper
+import src.BSE_Helper as helper
 from src.cc_BSE_spinorb import build_hbse_spin
 
 tol = 1e-8
