@@ -1,12 +1,12 @@
 ========== SYSTEM INFORMATION ==========
 HPS aug-cc-pVTZ
+BCCD tolerance: 1e-08, BCCD max cycle: 200
 
+nocc:16, nvir:107
 Hartree-Fock energy, Ha: -738.864972817878
 
 BCCD energy, Ha: -739.2937892736112
 Correlation energy, Ha: -0.43344668303057504
-
-nocc:16, nvir:107
 
 ========== CC-BSE RESULTS ==========
 Ionisation potentials (eV): [-2502.9189516177 -2177.3646042169  -244.2874562298  -205.4033326199  -181.2256673345  -181.210016926   -181.1547986321  -148.144021343   -148.1358803384  -148.0992999509]

@@ -1,12 +1,12 @@
 ========== SYSTEM INFORMATION ==========
 methanimine aug-cc-pVTZ
+BCCD tolerance: 1e-08, BCCD max cycle: 200
 
+nocc:8, nvir:153
 Hartree-Fock energy, Ha: -94.06927129716969
 
 BCCD energy, Ha: -94.49694419094897
 Correlation energy, Ha: -0.43172336301270536
-
-nocc:8, nvir:153
 
 ========== CC-BSE RESULTS ==========
 Ionisation potentials (eV): [-423.3949464914 -306.5816574773  -34.1037316495  -24.3560978086  -20.2646397287  -18.0610175989  -14.6557071054  -13.5364959311]

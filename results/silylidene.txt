@@ -1,12 +1,12 @@
 ========== SYSTEM INFORMATION ==========
 silylidene aug-cc-pVTZ
+BCCD tolerance: 1e-08, BCCD max cycle: 200
 
+nocc:11, nvir:131
 Hartree-Fock energy, Ha: -327.90069354566447
 
 BCCD energy, Ha: -328.2681554183965
 Correlation energy, Ha: -0.37157039903113576
-
-nocc:11, nvir:131
 
 ========== CC-BSE RESULTS ==========
 Ionisation potentials (eV): [-1872.5708623174  -304.5682429816  -167.4135676041  -115.9608441657  -115.915788936   -115.9080350796   -25.788796486    -17.8806264789   -16.8419126277   -11.8434309236]

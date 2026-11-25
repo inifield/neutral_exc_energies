@@ -1,12 +1,12 @@
 ========== SYSTEM INFORMATION ==========
 thioformaldehyde aug-cc-pVTZ
+BCCD tolerance: 1e-08, BCCD max cycle: 200
 
+nocc:12, nvir:130
 Hartree-Fock energy, Ha: -436.5575227525061
 
 BCCD energy, Ha: -436.97611355600367
 Correlation energy, Ha: -0.4231220086465437
-
-nocc:12, nvir:130
 
 ========== CC-BSE RESULTS ==========
 Ionisation potentials (eV): [-2502.6796998488  -307.1735083163  -244.0607072931  -181.010967805   -180.9950375586  -180.9372813058   -29.8898685769   -23.3657587345   -18.7111402894   -16.4342109784]

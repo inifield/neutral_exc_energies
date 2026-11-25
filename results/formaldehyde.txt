@@ -1,12 +1,12 @@
 ========== SYSTEM INFORMATION ==========
 formaldehyde aug-cc-pVTZ
+BCCD tolerance: 1e-08, BCCD max cycle: 200
 
+nocc:8, nvir:130
 Hartree-Fock energy, Ha: -113.91365472637511
 
 BCCD energy, Ha: -114.35690136756473
 Correlation energy, Ha: -0.4487009264174293
-
-nocc:8, nvir:130
 
 ========== CC-BSE RESULTS ==========
 Ionisation potentials (eV): [-560.3963637916 -307.9978211672  -39.802007199   -24.9946625512  -20.4611415007  -19.9224832017  -17.3835415109  -14.0432995562]

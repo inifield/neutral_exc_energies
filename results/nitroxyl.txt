@@ -1,12 +1,12 @@
 ========== SYSTEM INFORMATION ==========
 nitroxyl aug-cc-pVTZ
+BCCD tolerance: 1e-08, BCCD max cycle: 200
 
+nocc:8, nvir:107
 Hartree-Fock energy, Ha: -129.83904955730654
 
 BCCD energy, Ha: -130.317515514773
 Correlation energy, Ha: -0.48490980538677436
-
-nocc:8, nvir:107
 
 ========== CC-BSE RESULTS ==========
 Ionisation potentials (eV): [-562.2346165299 -426.8803287833  -43.0485214487  -28.6084567519  -22.2975354753  -20.0059896188  -19.315440885   -13.6120905872]

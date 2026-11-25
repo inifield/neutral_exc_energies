@@ -1,5 +1,6 @@
 import numpy as np
 import sys
+import argparse
 from pyscf import gto, cc, lib
 from pathlib import Path
 
@@ -42,16 +43,24 @@ def save_timer(label, start,timings):
     timings[label] = (cpu, wall)
 
 labels = sorted((p.stem for p in Path("geometries").glob("*.xyz")),key=str.casefold)
+parser = argparse.ArgumentParser()
+parser.add_argument("molecules",nargs="*",default = ["beryllium"],help="Molecule labels (default - beryllium); 'all' for all")
+parser.add_argument("--save",action="store_true",help="Save results to text files")
+args = parser.parse_args()
 
-# Select molecule from terminal command and return error if molecule not available
-label = sys.argv[1] if len(sys.argv) > 1 else "beryllium"
+label_lookup = {label.casefold(): label for label in labels}
 
-if label == 'all':
+
+if [label.casefold() for label in args.molecules] == ["all"]:
     selected = labels
 else:
-    if label not in labels:
-        sys.exit(f"Unknown molecule '{label}'. " f"Available: {labels}")
-    selected = [label]
+    selected = []
+    for label in args.molecules:
+        if label.casefold() not in label_lookup:
+            parser.error(f"Unknown molecule '{label}'. Available: {labels}")
+        selected.append(label_lookup[label.casefold()])
+
+        
 
 
 def perform_calculation(label,basis_set,tol,max_cycle):
@@ -71,11 +80,19 @@ def perform_calculation(label,basis_set,tol,max_cycle):
 
     print("========== SYSTEM INFORMATION ==========")
     print(label, basis_set)
+    print(f"BCCD tolerance: {tol}, BCCD max cycle: {max_cycle}")
     print()
 
     #Perform BCCD and return the MO coefficients and doubles amplitudes
     t0 = start_timer()
     myhf = mol.HF().run() 
+
+    #Number of occupied and virtual spatial orbitals
+    n_occ_spa = np.count_nonzero(myhf.mo_occ > 0)
+    n_vir_spa = np.count_nonzero(myhf.mo_occ == 0)
+
+    print(f'nocc:{n_occ_spa}, nvir:{n_vir_spa}')
+
     print("Hartree-Fock energy, Ha:", myhf.e_tot)
     save_timer("HF", t0, timings)
 
@@ -87,21 +104,13 @@ def perform_calculation(label,basis_set,tol,max_cycle):
     t2 = mycc.t2
     save_timer("BCCD", t0, timings)
 
-    #Number of occupied and virtual MOs
-    n_occ_spa = int(t2.shape[0])
-    n_vir_spa = int(t2.shape[2])
-
-    print()
-    print(f'nocc:{n_occ_spa}, nvir:{n_vir_spa}')
-    print()
-
     #Performs spin-adapted (spatial) calculation and returns lowest singlet/triplet excitation energies as well as modified Koopman's IP/EAs
     t0 = start_timer()
-    H_sing_spa,H_trip_spa,ext_fock, Hbaresing, Ht2sing, Hbaretrip, Ht2trip, F_ij, F_ab,_,_,selfener_occ,selfener_vir = CC_BSE_spatial(mol,mo,t2,n_occ_spa,n_vir_spa)
+    H_sing_spa,H_trip_spa,ext_fock, Hbaresing,_, Hbaretrip,_, F_ij, F_ab,_,_,_,_ = CC_BSE_spatial(mol,mo,t2,n_occ_spa,n_vir_spa)
     save_timer("CC-BSE", t0, timings)
 
     t0 = start_timer()
-    print("========== CC-BSE RESULTS ==========")
+    print("\n========== CC-BSE RESULTS ==========")
     print("Ionisation potentials (eV):", eigvals(F_ij,10))
     print("Electron affinities (eV):", eigvals(F_ab,10))
 
@@ -131,14 +140,16 @@ def perform_calculation(label,basis_set,tol,max_cycle):
     # print("Triplet energies (eV):", eigvals(H_trip_spin,10))
 
 for label in selected:
-    with open(f"results/{label}.txt","w",buffering=1) as output_file:
-        original_stdout = sys.stdout
-        sys.stdout = Tee(output_file)
-        try:
-            perform_calculation(label,BASIS,tol,max_cycle)
-        finally:
-            sys.stdout = original_stdout
-
+    if args.save:
+        with open(f"results/{label}.txt","w",buffering=1) as output_file:
+            original_stdout = sys.stdout
+            sys.stdout = Tee(output_file)
+            try:
+                perform_calculation(label,BASIS,tol,max_cycle)
+            finally:
+                sys.stdout = original_stdout
+    else:
+        perform_calculation(label,BASIS,tol,max_cycle)
 
 
 

@@ -1,12 +1,12 @@
 ========== SYSTEM INFORMATION ==========
 ketene aug-cc-pVTZ
+BCCD tolerance: 1e-08, BCCD max cycle: 200
 
+nocc:11, nvir:173
 Hartree-Fock energy, Ha: -151.78599300081052
 
 BCCD energy, Ha: -152.39175471209793
 Correlation energy, Ha: -0.613735437761024
-
-nocc:11, nvir:173
 
 ========== CC-BSE RESULTS ==========
 Ionisation potentials (eV): [-561.8110398875 -308.9073424414 -305.4174506988  -41.5620678028  -29.5656474499  -22.7667884247  -20.0812781881  -19.8236205635  -19.6218381903  -17.3715231116]

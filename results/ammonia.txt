@@ -1,12 +1,12 @@
 ========== SYSTEM INFORMATION ==========
 ammonia aug-cc-pVTZ
+BCCD tolerance: 1e-08, BCCD max cycle: 200
 
+nocc:5, nvir:110
 Hartree-Fock energy, Ha: -56.22031184755188
 
 BCCD energy, Ha: -56.4891012440991
 Correlation energy, Ha: -0.270233934251094
-
-nocc:5, nvir:110
 
 ========== CC-BSE RESULTS ==========
 Ionisation potentials (eV): [-422.6984384029  -32.3697561054  -18.9495132204  -18.9495132204  -13.474067524 ]

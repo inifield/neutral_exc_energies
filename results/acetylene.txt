@@ -1,12 +1,12 @@
 ========== SYSTEM INFORMATION ==========
 acetylene aug-cc-pVTZ
+BCCD tolerance: 1e-08, BCCD max cycle: 200
 
+nocc:7, nvir:131
 Hartree-Fock energy, Ha: -76.84979668209974
 
 BCCD energy, Ha: -77.20962304834991
 Correlation energy, Ha: -0.36380041841944444
-
-nocc:7, nvir:131
 
 ========== CC-BSE RESULTS ==========
 Ionisation potentials (eV): [-305.4464715944 -305.3454628832  -29.0165491905  -22.1023629293  -19.8777226314  -13.1784209775  -13.1784209775]

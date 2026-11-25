@@ -1,12 +1,12 @@
 ========== SYSTEM INFORMATION ==========
 HPO aug-cc-pVTZ
+BCCD tolerance: 1e-08, BCCD max cycle: 200
 
+nocc:12, nvir:107
 Hartree-Fock energy, Ha: -416.198740186128
 
 BCCD energy, Ha: -416.6586063941168
 Correlation energy, Ha: -0.46694388736573594
-
-nocc:12, nvir:107
 
 ========== CC-BSE RESULTS ==========
 Ionisation potentials (eV): [-2177.8429131231  -560.3388357043  -205.8426655031  -148.5940652124  -148.5926734748  -148.5331087944   -37.9865668891   -22.8256233296   -18.4416730573   -17.0487582265]
