@@ -2,15 +2,28 @@
 import numpy as np
 import sys
 from scipy.linalg import eig, solve
-from pyscf import gto, scf
+from pyscf import gto
 from pyscf.tdscf import ghf
 from pyscf.data.nist import HARTREE2EV
-from src.molecules import molecules
 
 import src.BSE_Helper as helper
 from src.cc_BSE_spinorb import build_hbse_spin
 
 tol = 1e-8
+
+molecules = {
+    "H2": {
+        "atom": "H 0 0 0; H 0 0 2.00",
+        "unit": "Bohr", "spin": 0, "symmetry": False},
+
+    "H2O": {
+        "atom": """
+        O  0.000000  0.000000  0.117300
+        H  0.000000  0.757200 -0.469200
+        H  0.000000 -0.757200 -0.469200
+        """,
+        "unit": "Angstrom", "spin": 0, "symmetry": False}
+}
 
 def max_error(X, Y):
     return np.max(np.abs(X - Y))
