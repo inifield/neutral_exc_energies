@@ -7,6 +7,7 @@ from pathlib import Path
 from src.BSE_Helper import lowest_eigvals as eigvals
 from src.cc_BSE_spatialorb import CC_BSE_spatial
 from src.cc_BSE_spinorb import CC_BSE_spin
+from src.RPA import RPA_calc
 
 np.set_printoptions(precision=10, suppress=True, linewidth=100000)
 
@@ -61,9 +62,10 @@ max_cycle = 200
 tol = 1e-8
 BASIS = "aug-cc-pVTZ"
 spin_orb_calc = False
+RPA_calc_on = False
 
 #Function which actually performs CC-BSE calculation
-def perform_calculation(label,basis_set,tol,max_cycle,spin=False):
+def perform_calculation(label,basis_set,tol,max_cycle,spin=False,rpa=False):
 
     timings = {}
     xyz_file = Path("geometries") / f"{label}.xyz"
@@ -85,7 +87,7 @@ def perform_calculation(label,basis_set,tol,max_cycle,spin=False):
 
     #Perform BCCD and return the MO coefficients and doubles amplitudes
     t0 = start_timer()
-    myhf = mol.HF().run() 
+    myhf = mol.HF().run()
 
     #Number of occupied and virtual spatial orbitals
     n_occ_spa = np.count_nonzero(myhf.mo_occ > 0)
@@ -133,6 +135,15 @@ def perform_calculation(label,basis_set,tol,max_cycle,spin=False):
         print("Triplet energies (eV):", eigvals(H_trip_spin,10))
         save_timer("Spin orbit diagonalisation", t0, timings)
 
+    if rpa:
+        print("\n========== RPA ==========")
+        t0 = start_timer()
+        RPA_sing, RPA_trip = RPA_calc(myhf)
+        print("Singlet energies (eV):", RPA_sing)
+        print("Triplet energies (eV):", RPA_trip)
+        save_timer("RPA", t0, timings)
+        
+
     print("\n========== CALCULATION TIMINGS ==========")
     print(f"{'Component':<32} {'CPU (s)':>12} {'Wall (s)':>12}")
     print("-" * 64)
@@ -153,11 +164,11 @@ for label in selected:
             original_stdout = sys.stdout
             sys.stdout = Tee(output_file)
             try:
-                perform_calculation(label,BASIS,tol,max_cycle,spin_orb_calc)
+                perform_calculation(label,BASIS,tol,max_cycle,spin_orb_calc,RPA_calc_on)
             finally:
                 sys.stdout = original_stdout
     else:
-        perform_calculation(label,BASIS,tol,max_cycle,spin_orb_calc)
+        perform_calculation(label,BASIS,tol,max_cycle,spin_orb_calc,RPA_calc_on)
 
 
 
